@@ -4,6 +4,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -26,7 +27,14 @@ public class Popup implements IsWidget, HasOneWidget {
 	private SimplePanel appriseContent;
 	private FlowPanel appriseButtons;
 
+	private String idOverlay;
+	private String idPopup;
+
 	public Popup() {
+		String idUnique = DOM.createUniqueId();
+		idOverlay = APPRISE_OVERLAY_ID + idUnique;
+		idPopup = APPRISE_ID + idUnique;
+
 		this.appriseContent = new SimplePanel();
 		this.appriseButtons = new FlowPanel();
 		popupWidget = new FlowPanel();
@@ -54,25 +62,48 @@ public class Popup implements IsWidget, HasOneWidget {
 			@Override
 			public void onResize(ResizeEvent event) {
 				if (isShowing) {
-					adjustWidth();
+					adjustWidth(idPopup);
 				}
 			}
 		});
 	}
 
+	// @formatter:off
+	private native void initDom(String overlayId, String popupId) /*-{
+		var appriseOverlayElement = $wnd.document.createElement("div");
+		var appriseElement = $wnd.document.createElement("div");
+
+		appriseOverlayElement.id = overlayId;
+		appriseElement.id = popupId;
+
+		$wnd.document.body.appendChild(appriseOverlayElement);
+		$wnd.document.body.appendChild(appriseElement);
+
+	}-*/;
+
+	// @formatter:on
+
 	public void show() {
 		isShowing = true;
-		RootPanel.get(APPRISE_ID).add(this);
-		RootPanel.get(APPRISE_OVERLAY_ID).addStyleName(css.show());
-		RootPanel.get(APPRISE_ID).addStyleName(css.show());
-		adjustWidth();
+		initDom(this.idOverlay, this.idPopup);
+
+		RootPanel.get(this.idOverlay).addStyleName(css.overlay());
+		RootPanel.get(this.idPopup).addStyleName(css.apprise());
+
+		RootPanel.get(this.idPopup).add(this);
+		RootPanel.get(this.idOverlay).addStyleName(css.show());
+		RootPanel.get(this.idPopup).addStyleName(css.show());
+		adjustWidth(idPopup);
 	}
 
 	public void hide() {
 		isShowing = false;
-		RootPanel.get(APPRISE_ID).remove(this);
-		RootPanel.get(APPRISE_OVERLAY_ID).removeStyleName(css.show());
-		RootPanel.get(APPRISE_ID).removeStyleName(css.show());
+		RootPanel.get(this.idPopup).remove(this);
+		RootPanel.get(this.idPopup).removeStyleName(css.show());
+		RootPanel.get(this.idOverlay).removeStyleName(css.show());
+		
+		RootPanel.get(this.idPopup).removeFromParent();
+		RootPanel.get(this.idOverlay).removeFromParent();
 	}
 
 	public Widget asWidget() {
@@ -80,7 +111,7 @@ public class Popup implements IsWidget, HasOneWidget {
 	}
 
 	// @formatter:off
-	private native void adjustWidth() /*-{
+	private native void adjustWidth(String idPopup) /*-{
 		var window_width = $wnd.innerWidth, w = "20%", l = "40%";
 		if (window_width <= 800) {
 			w = "90%", l = "5%";
@@ -90,10 +121,10 @@ public class Popup implements IsWidget, HasOneWidget {
 			w = "50%", l = "25%";
 		} else if (window_width <= 2200 && window_width > 1800) {
 			w = "40%", l = "30%";
-		}else if (window_width >= 2200 ){
+		} else if (window_width >= 2200) {
 			w = "40%", l = "30%";
 		}
-		$wnd.document.getElementById("apprise-popup").style.cssText = 'width: '
+		$wnd.document.getElementById(idPopup).style.cssText = 'width: '
 				+ w + ';left:' + l + ';';
 	}-*/;
 
