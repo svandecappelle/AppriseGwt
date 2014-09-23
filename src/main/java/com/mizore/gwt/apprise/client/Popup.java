@@ -191,4 +191,12 @@ public class Popup implements IsWidget, HasOneWidget {
 		appriseContent.setWidget(w);
 	}
 
+	public void addStyleName(String style) {
+		asWidget().addStyleName(style);
+	}
+
+	public void removeStyleName(String style) {
+		asWidget().removeStyleName(style);
+	}
+
 }
