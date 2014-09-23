@@ -1,10 +1,13 @@
 package com.mizore.gwt.apprise.client;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -21,6 +24,8 @@ public class Popup implements IsWidget, HasOneWidget {
 
 	private static final ThemeResource css = AppriseClientBundle.Util.getBundle().theme();
 	private boolean isShowing;
+
+	private boolean initialShow = true;
 
 	private FlowPanel popupWidget;
 
@@ -69,6 +74,7 @@ public class Popup implements IsWidget, HasOneWidget {
 	}
 
 	// @formatter:off
+
 	private native void initDom(String overlayId, String popupId) /*-{
 		var appriseOverlayElement = $wnd.document.createElement("div");
 		var appriseElement = $wnd.document.createElement("div");
@@ -84,16 +90,54 @@ public class Popup implements IsWidget, HasOneWidget {
 	// @formatter:on
 
 	public void show() {
-		isShowing = true;
-		initDom(this.idOverlay, this.idPopup);
+		if (initialShow) {
+			Scheduler.get().scheduleEntry(new ScheduledCommand() {
 
-		RootPanel.get(this.idOverlay).addStyleName(css.overlay());
-		RootPanel.get(this.idPopup).addStyleName(css.apprise());
+				@Override
+				public void execute() {
+					initDom(idOverlay, idPopup);
+					RootPanel.get(idOverlay).addStyleName(css.overlay());
+					RootPanel.get(idPopup).addStyleName(css.apprise());
 
-		RootPanel.get(this.idPopup).add(this);
-		RootPanel.get(this.idOverlay).addStyleName(css.show());
-		RootPanel.get(this.idPopup).addStyleName(css.show());
-		adjustWidth(idPopup);
+					initialShow = false;
+
+					Scheduler.get().scheduleEntry(new ScheduledCommand() {
+
+						@Override
+						public void execute() {
+
+							showInitial();
+						}
+					});
+				}
+			});
+
+		} else {
+			isShowing = true;
+
+			RootPanel.get(this.idOverlay).addStyleName(css.overlay());
+			RootPanel.get(this.idPopup).addStyleName(css.apprise());
+
+			RootPanel.get(this.idPopup).add(this);
+			RootPanel.get(this.idOverlay).addStyleName(css.show());
+			RootPanel.get(this.idPopup).addStyleName(css.show());
+			adjustWidth(idPopup);
+		}
+	}
+
+	private void showInitial() {
+		Timer t = new Timer() {
+
+			@Override
+			public void run() {
+				RootPanel.get(idPopup).add(Popup.this);
+				RootPanel.get(idOverlay).addStyleName(css.show());
+				RootPanel.get(idPopup).addStyleName(css.show());
+				adjustWidth(idPopup);
+			}
+		};
+		t.schedule(100);
+
 	}
 
 	public void hide() {
@@ -101,13 +145,15 @@ public class Popup implements IsWidget, HasOneWidget {
 		RootPanel.get(this.idPopup).remove(this);
 		RootPanel.get(this.idPopup).removeStyleName(css.show());
 		RootPanel.get(this.idOverlay).removeStyleName(css.show());
-		
-		RootPanel.get(this.idPopup).removeFromParent();
-		RootPanel.get(this.idOverlay).removeFromParent();
 	}
 
 	public Widget asWidget() {
 		return popupWidget;
+	}
+
+	public void remove() {
+		RootPanel.get(this.idPopup).removeFromParent();
+		RootPanel.get(this.idOverlay).removeFromParent();
 	}
 
 	// @formatter:off
@@ -124,8 +170,8 @@ public class Popup implements IsWidget, HasOneWidget {
 		} else if (window_width >= 2200) {
 			w = "40%", l = "30%";
 		}
-		$wnd.document.getElementById(idPopup).style.cssText = 'width: '
-				+ w + ';left:' + l + ';';
+		$wnd.document.getElementById(idPopup).style.cssText = 'width: ' + w
+				+ ';left:' + l + ';';
 	}-*/;
 
 	// @formatter:on
