@@ -91,40 +91,27 @@ public class Popup implements IsWidget, HasOneWidget {
 	}
 
 	public void show() {
-		if (initialShow) {
-			Scheduler.get().scheduleEntry(new ScheduledCommand() {
+		Scheduler.get().scheduleEntry(new ScheduledCommand() {
 
-				@Override
-				public void execute() {
-					initDom(idOverlay, idPopup);
+			@Override
+			public void execute() {
+				initDom(idOverlay, idPopup);
 
-					overlay.addStyleName(css.overlay());
-					popup.addStyleName(css.apprise());
+				overlay.addStyleName(css.overlay());
+				popup.addStyleName(css.apprise());
 
-					initialShow = false;
+				initialShow = false;
 
-					Scheduler.get().scheduleEntry(new ScheduledCommand() {
+				Scheduler.get().scheduleEntry(new ScheduledCommand() {
 
-						@Override
-						public void execute() {
+					@Override
+					public void execute() {
 
-							showInitial();
-						}
-					});
-				}
-			});
-
-		} else {
-			isShowing = true;
-
-			this.overlay.addStyleName(css.overlay());
-			this.popup.addStyleName(css.apprise());
-
-			this.popup.add(this);
-			this.overlay.addStyleName(css.show());
-			this.popup.addStyleName(css.show());
-			adjustWidth(idPopup);
-		}
+						showInitial();
+					}
+				});
+			}
+		});
 	}
 
 	private void showInitial() {
@@ -132,7 +119,7 @@ public class Popup implements IsWidget, HasOneWidget {
 
 			@Override
 			public void run() {
-				popup.add(Popup.this);
+				popup.setWidget(Popup.this);
 				overlay.addStyleName(css.show());
 				popup.addStyleName(css.show());
 				adjustWidth(idPopup);

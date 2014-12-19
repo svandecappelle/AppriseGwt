@@ -31,6 +31,10 @@ div.apprise {
 	top: -100%;
 	width: 20%;
 	-webkit-transition: top 500ms linear;
+	-moz-transition: top 500ms linear;
+	-ms-transition: top 500ms linear;
+	transition: top 500ms linear;
+	-o-transition: top 500ms linear;
 }
 
 div.apprise.show{
@@ -59,9 +63,11 @@ div.apprise .apprise-input input {
 	border-radius: 2px;
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
+	
 	box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
-	-mox-box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+	-moz-box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
 	-webkit-box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+	
 	display: block;
 	font-size: 13px;
 	margin: 0 auto;
