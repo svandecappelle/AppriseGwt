@@ -37,6 +37,19 @@ public class Popup implements IsWidget, HasOneWidget {
 	private AppriseElement popup;
 	private AppriseElement overlay;
 
+	public Popup(boolean addokButton) {
+		this();
+		if (addokButton) {
+			this.addButton("OK").addClickHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent event) {
+					hide();
+				}
+			});
+		}
+	}
+
 	public Popup() {
 		String idUnique = DOM.createUniqueId();
 		idOverlay = APPRISE_OVERLAY_ID + idUnique;
@@ -53,17 +66,6 @@ public class Popup implements IsWidget, HasOneWidget {
 
 		popupWidget.add(appriseInner);
 		popupWidget.add(appriseButtons);
-
-		Button okButton = new Button("OK");
-		this.appriseButtons.add(okButton);
-
-		okButton.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				hide();
-			}
-		});
 
 		Window.addResizeHandler(new ResizeHandler() {
 
@@ -91,6 +93,7 @@ public class Popup implements IsWidget, HasOneWidget {
 	}
 
 	public void show() {
+		isShowing = true;
 		Scheduler.get().scheduleEntry(new ScheduledCommand() {
 
 			@Override
@@ -183,6 +186,16 @@ public class Popup implements IsWidget, HasOneWidget {
 
 	public void removeStyleName(String style) {
 		asWidget().removeStyleName(style);
+	}
+
+	public boolean isVisible() {
+		return isShowing;
+	}
+
+	public Button addButton(String text) {
+		Button button = new Button(text);
+		this.appriseButtons.add(button);
+		return button;
 	}
 
 }
