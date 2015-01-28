@@ -58,7 +58,8 @@ public class Popup implements IsWidget, HasOneWidget {
 		this.appriseContent = new SimplePanel();
 		this.appriseButtons = new FlowPanel();
 		popupWidget = new FlowPanel();
-
+		popupWidget.addStyleName(css.popupwidget());
+		
 		SimplePanel appriseInner = new SimplePanel(appriseContent);
 		appriseInner.addStyleName(css.appriseInner());
 		appriseContent.addStyleName(css.appriseContent());

@@ -15,4 +15,6 @@ public interface ThemeResource extends CssResource {
 	String appriseContent();
 
 	String show();
+
+	String popupwidget();
 }

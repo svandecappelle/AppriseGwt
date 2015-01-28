@@ -1,5 +1,5 @@
 .overlay {
-	background-color: rgba(255,255,255, 0.95);
+	background-color: rgba(255, 255, 255, 0.95);
 	display: none;
 	height: 100%;
 	left: 0;
@@ -9,7 +9,7 @@
 	z-index: 999999;
 }
 
-.overlay.show{
+.overlay.show {
 	display: block;
 }
 
@@ -37,20 +37,31 @@ div.apprise {
 	-o-transition: top 500ms linear;
 }
 
-div.apprise.show{
+div.apprise.show {
 	top: 20%;
+	bottom: 20%;
 }
 
-.appriseContent{
-	
+.appriseContent {
+	overflow-y: auto;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
 }
 
-.appriseInner{
+.appriseInner {
 	
 }
 
 div.apprise .appriseInner {
 	padding: 20px;
+	position: absolute;
+	top: 0;
+	bottom: 60px;
+	left: 0;
+	right: 0;
 }
 
 div.apprise .apprise-input {
@@ -63,11 +74,9 @@ div.apprise .apprise-input input {
 	border-radius: 2px;
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
-	
 	box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
 	-moz-box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
 	-webkit-box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
-	
 	display: block;
 	font-size: 13px;
 	margin: 0 auto;
@@ -90,8 +99,19 @@ div.apprise .appriseButtons {
 	text-align: right;
 }
 
-.appriseButtons{
-	
+.appriseButtons {
+	position: absolute;
+	bottom: 0px;
+	left: 0;
+	right: 0;
+}
+
+.popupwidget {
+	top: 0;
+	bottom: 0;
+	height: 100%;
+	position: relative;
+	width: 100%;
 }
 
 div.apprise .appriseButtons button {
