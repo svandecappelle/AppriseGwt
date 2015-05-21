@@ -2,6 +2,8 @@ package com.mizore.gwt.apprise.client;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Style.Position;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
@@ -59,14 +61,13 @@ public class Popup implements IsWidget, HasOneWidget {
 		this.appriseButtons = new FlowPanel();
 		popupWidget = new FlowPanel();
 		popupWidget.addStyleName(css.popupwidget());
-		
+
 		SimplePanel appriseInner = new SimplePanel(appriseContent);
 		appriseInner.addStyleName(css.appriseInner());
 		appriseContent.addStyleName(css.appriseContent());
 		appriseButtons.addStyleName(css.appriseButtons());
 
 		popupWidget.add(appriseInner);
-		popupWidget.add(appriseButtons);
 
 		Window.addResizeHandler(new ResizeHandler() {
 
@@ -194,9 +195,23 @@ public class Popup implements IsWidget, HasOneWidget {
 	}
 
 	public Button addButton(String text) {
+		if (!appriseButtons.isAttached()) {
+			popupWidget.add(appriseButtons);
+		}
 		Button button = new Button(text);
 		this.appriseButtons.add(button);
 		return button;
+	}
+
+	public void setFooterWidget(IsWidget footerWidget) {
+
+		footerWidget.asWidget().getElement().getStyle().setPosition(Position.ABSOLUTE);
+		footerWidget.asWidget().getElement().getStyle().setBottom(0, Unit.PX);
+		footerWidget.asWidget().getElement().getStyle().setLeft(0, Unit.PX);
+		footerWidget.asWidget().getElement().getStyle().setRight(0, Unit.PX);
+		footerWidget.asWidget().getElement().getStyle().setMarginBottom(0, Unit.PX);
+
+		popupWidget.add(footerWidget);
 	}
 
 }
