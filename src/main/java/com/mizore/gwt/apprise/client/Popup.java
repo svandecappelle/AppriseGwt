@@ -6,7 +6,6 @@ import java.util.TreeMap;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -64,6 +63,9 @@ public class Popup implements IsWidget, HasOneWidget {
         idOverlay = APPRISE_OVERLAY_ID + idUnique;
         idPopup = APPRISE_ID + idUnique;
 
+        this.popup = new AppriseElement(idPopup);
+        this.overlay = new AppriseElement(idOverlay);
+
         this.appriseContent = new SimplePanel();
         this.appriseButtons = new FlowPanel();
         popupWidget = new FlowPanel();
@@ -91,18 +93,18 @@ public class Popup implements IsWidget, HasOneWidget {
         });
     }
 
-    private void initDom(String overlayId, String popupId) {
+    private void initDom() {
         RootPanel appriseRoot = RootPanel.get(APPRISE_ID);
         if (appriseRoot == null) {
             new AppriseRootPanel().insert();
         }
 
-        this.popup = new AppriseElement(popupId);
-        this.overlay = new AppriseElement(overlayId);
-
         RootPanel.get(APPRISE_ID).add(this.overlay);
         RootPanel.get(APPRISE_ID).add(this.popup);
+    }
 
+    public void setBackgroundColorOverlay(String cssBackgroundColor) {
+        overlay.getElement().getStyle().setBackgroundColor(cssBackgroundColor);
     }
 
     public void show() {
@@ -111,7 +113,7 @@ public class Popup implements IsWidget, HasOneWidget {
 
             @Override
             public void execute() {
-                initDom(idOverlay, idPopup);
+                initDom();
 
                 overlay.addStyleName(css.overlay());
                 popup.addStyleName(css.apprise());
@@ -182,8 +184,8 @@ public class Popup implements IsWidget, HasOneWidget {
         }
 
         if (currentPreference != null) {
-            Document.get().getElementById(idPopup).getStyle().setWidth(currentPreference.getPopupWidth(), currentPreference.getUnitWidth());
-            Document.get().getElementById(idPopup).getStyle().setLeft(currentPreference.getLeftBorder(), currentPreference.getUnitLeft());
+            popup.getElement().getStyle().setWidth(currentPreference.getPopupWidth(), currentPreference.getUnitWidth());
+            popup.getElement().getStyle().setLeft(currentPreference.getLeftBorder(), currentPreference.getUnitLeft());
         } else {
             adjustWidthNative(idPopup);
         }
