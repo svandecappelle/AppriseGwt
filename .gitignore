@@ -31,3 +31,7 @@ www-test/
 .classpath
 .project
 .settings/
+
+# Testing app
+src/main/java/com/mizore/gwt/apprise/client/Test.java
+src/main/webapp

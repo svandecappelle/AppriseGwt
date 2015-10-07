@@ -1,7 +1,12 @@
 package com.mizore.gwt.apprise.client;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -21,135 +26,172 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class Popup implements IsWidget, HasOneWidget {
 
-	protected static final String APPRISE_ID = "apprise-popup";
-	protected static final String APPRISE_OVERLAY_ID = "apprise-overlay";
+    protected static final String APPRISE_ID = "apprise-popup";
+    protected static final String APPRISE_OVERLAY_ID = "apprise-overlay";
 
-	private static final ThemeResource css = AppriseClientBundle.Util.getBundle().theme();
-	private boolean isShowing;
+    private static final ThemeResource css = AppriseClientBundle.Util.getBundle().theme();
+    private boolean isShowing;
 
-	private boolean initialShow = true;
+    private boolean initialShow = true;
 
-	private FlowPanel popupWidget;
+    private FlowPanel popupWidget;
 
-	private SimplePanel appriseContent;
-	private FlowPanel appriseButtons;
+    private SimplePanel appriseContent;
+    private FlowPanel appriseButtons;
 
-	private String idOverlay;
-	private String idPopup;
-	private AppriseElement popup;
-	private AppriseElement overlay;
+    private String idOverlay;
+    private String idPopup;
+    private AppriseElement popup;
+    private AppriseElement overlay;
 
-	public Popup(boolean addokButton) {
-		this();
-		if (addokButton) {
-			this.addButton("OK").addClickHandler(new ClickHandler() {
+    private Map<Integer, SizePreference> preferences;
 
-				@Override
-				public void onClick(ClickEvent event) {
-					hide();
-				}
-			});
-		}
-	}
+    public Popup(boolean addokButton) {
+        this();
+        if (addokButton) {
+            this.addButton("OK").addClickHandler(new ClickHandler() {
 
-	public Popup() {
-		String idUnique = DOM.createUniqueId();
-		idOverlay = APPRISE_OVERLAY_ID + idUnique;
-		idPopup = APPRISE_ID + idUnique;
+                @Override
+                public void onClick(ClickEvent event) {
+                    hide();
+                }
+            });
+        }
+    }
 
-		this.appriseContent = new SimplePanel();
-		this.appriseButtons = new FlowPanel();
-		popupWidget = new FlowPanel();
-		popupWidget.addStyleName(css.popupwidget());
+    public Popup() {
+        String idUnique = DOM.createUniqueId();
+        idOverlay = APPRISE_OVERLAY_ID + idUnique;
+        idPopup = APPRISE_ID + idUnique;
 
-		SimplePanel appriseInner = new SimplePanel(appriseContent);
-		appriseInner.addStyleName(css.appriseInner());
-		appriseContent.addStyleName(css.appriseContent());
-		appriseButtons.addStyleName(css.appriseButtons());
+        this.appriseContent = new SimplePanel();
+        this.appriseButtons = new FlowPanel();
+        popupWidget = new FlowPanel();
+        popupWidget.addStyleName(css.popupwidget());
 
-		popupWidget.add(appriseInner);
+        SimplePanel appriseInner = new SimplePanel(appriseContent);
+        appriseInner.addStyleName(css.appriseInner());
+        appriseContent.addStyleName(css.appriseContent());
+        appriseButtons.addStyleName(css.appriseButtons());
 
-		Window.addResizeHandler(new ResizeHandler() {
+        popupWidget.add(appriseInner);
 
-			@Override
-			public void onResize(ResizeEvent event) {
-				if (isShowing) {
-					adjustWidth(idPopup);
-				}
-			}
-		});
-	}
+        Window.addResizeHandler(new ResizeHandler() {
 
-	private void initDom(String overlayId, String popupId) {
-		RootPanel appriseRoot = RootPanel.get(APPRISE_ID);
-		if (appriseRoot == null) {
-			new AppriseRootPanel().insert();
-		}
+            @Override
+            public void onResize(ResizeEvent event) {
+                if (isShowing) {
+                    if (preferences != null && !preferences.isEmpty()) {
+                        adjustWidth();
+                    } else {
+                        adjustWidthNative(idPopup);
+                    }
+                }
+            }
+        });
+    }
 
-		this.popup = new AppriseElement(popupId);
-		this.overlay = new AppriseElement(overlayId);
+    private void initDom(String overlayId, String popupId) {
+        RootPanel appriseRoot = RootPanel.get(APPRISE_ID);
+        if (appriseRoot == null) {
+            new AppriseRootPanel().insert();
+        }
 
-		RootPanel.get(APPRISE_ID).add(this.overlay);
-		RootPanel.get(APPRISE_ID).add(this.popup);
+        this.popup = new AppriseElement(popupId);
+        this.overlay = new AppriseElement(overlayId);
 
-	}
+        RootPanel.get(APPRISE_ID).add(this.overlay);
+        RootPanel.get(APPRISE_ID).add(this.popup);
 
-	public void show() {
-		isShowing = true;
-		Scheduler.get().scheduleEntry(new ScheduledCommand() {
+    }
 
-			@Override
-			public void execute() {
-				initDom(idOverlay, idPopup);
+    public void show() {
+        isShowing = true;
+        Scheduler.get().scheduleEntry(new ScheduledCommand() {
 
-				overlay.addStyleName(css.overlay());
-				popup.addStyleName(css.apprise());
+            @Override
+            public void execute() {
+                initDom(idOverlay, idPopup);
 
-				initialShow = false;
+                overlay.addStyleName(css.overlay());
+                popup.addStyleName(css.apprise());
 
-				Scheduler.get().scheduleEntry(new ScheduledCommand() {
+                initialShow = false;
 
-					@Override
-					public void execute() {
+                Scheduler.get().scheduleEntry(new ScheduledCommand() {
 
-						showInitial();
-					}
-				});
-			}
-		});
-	}
+                    @Override
+                    public void execute() {
 
-	private void showInitial() {
-		Timer t = new Timer() {
+                        showInitial();
+                    }
+                });
+            }
+        });
+    }
 
-			@Override
-			public void run() {
-				popup.setWidget(Popup.this);
-				overlay.addStyleName(css.show());
-				popup.addStyleName(css.show());
-				adjustWidth(idPopup);
-			}
-		};
-		t.schedule(100);
+    private void showInitial() {
+        Timer t = new Timer() {
 
-	}
+            @Override
+            public void run() {
+                popup.setWidget(Popup.this);
+                overlay.addStyleName(css.show());
+                popup.addStyleName(css.show());
+                if (preferences != null && !preferences.isEmpty()) {
+                    adjustWidth();
+                } else {
+                    adjustWidthNative(idPopup);
+                }
+            }
+        };
+        t.schedule(100);
 
-	public void hide() {
-		isShowing = false;
-		this.remove();
-	}
+    }
 
-	public Widget asWidget() {
-		return popupWidget;
-	}
+    public void setDimensionPreference(ScreenDimensions screenLayout, SizePreference preferences) {
+        if (this.preferences == null) {
+            this.preferences = new TreeMap<Integer, SizePreference>();
+        }
+        this.preferences.put(screenLayout.getWindowWidth(), preferences);
+    }
 
-	public void remove() {
-		this.popup.removeFromParent();
-		this.overlay.removeFromParent();
-	}
+    public void hide() {
+        isShowing = false;
+        this.remove();
+    }
 
-	// @formatter:off
-	private native void adjustWidth(String idPopup) /*-{
+    public Widget asWidget() {
+        return popupWidget;
+    }
+
+    public void remove() {
+        this.popup.removeFromParent();
+        this.overlay.removeFromParent();
+    }
+
+    protected void adjustWidth() {
+        int clientWidth = Window.getClientWidth();
+        SizePreference currentPreference = null;
+        for (Entry<Integer, SizePreference> preferredSize : preferences.entrySet()) {
+            if (preferredSize.getKey() > clientWidth) {
+                break;
+            } else {
+                currentPreference = preferredSize.getValue();
+            }
+        }
+
+        if (currentPreference != null) {
+            Document.get().getElementById(idPopup).getStyle().setWidth(currentPreference.getPopupWidth(), currentPreference.getUnitWidth());
+            Document.get().getElementById(idPopup).getStyle().setLeft(currentPreference.getLeftBorder(), currentPreference.getUnitLeft());
+        } else {
+            adjustWidthNative(idPopup);
+        }
+
+    }
+
+    // @formatter:off
+	private native void adjustWidthNative(String idPopup) /*-{
 		var window_width = $wnd.innerWidth, w = "20%", l = "40%";
 		if (window_width <= 800) {
 			w = "90%", l = "5%";
@@ -167,51 +209,51 @@ public class Popup implements IsWidget, HasOneWidget {
 	}-*/;
 	// @formatter:on
 
-	@Override
-	public void setWidget(IsWidget w) {
-		appriseContent.setWidget(w);
-	}
+    @Override
+    public void setWidget(IsWidget w) {
+        appriseContent.setWidget(w);
+    }
 
-	@Override
-	public Widget getWidget() {
-		return appriseContent.getWidget();
-	}
+    @Override
+    public Widget getWidget() {
+        return appriseContent.getWidget();
+    }
 
-	@Override
-	public void setWidget(Widget w) {
-		appriseContent.setWidget(w);
-	}
+    @Override
+    public void setWidget(Widget w) {
+        appriseContent.setWidget(w);
+    }
 
-	public void addStyleName(String style) {
-		asWidget().addStyleName(style);
-	}
+    public void addStyleName(String style) {
+        asWidget().addStyleName(style);
+    }
 
-	public void removeStyleName(String style) {
-		asWidget().removeStyleName(style);
-	}
+    public void removeStyleName(String style) {
+        asWidget().removeStyleName(style);
+    }
 
-	public boolean isVisible() {
-		return isShowing;
-	}
+    public boolean isVisible() {
+        return isShowing;
+    }
 
-	public Button addButton(String text) {
-		if (!appriseButtons.isAttached()) {
-			popupWidget.add(appriseButtons);
-		}
-		Button button = new Button(text);
-		this.appriseButtons.add(button);
-		return button;
-	}
+    public Button addButton(String text) {
+        if (!appriseButtons.isAttached()) {
+            popupWidget.add(appriseButtons);
+        }
+        Button button = new Button(text);
+        this.appriseButtons.add(button);
+        return button;
+    }
 
-	public void setFooterWidget(IsWidget footerWidget) {
+    public void setFooterWidget(IsWidget footerWidget) {
 
-		footerWidget.asWidget().getElement().getStyle().setPosition(Position.ABSOLUTE);
-		footerWidget.asWidget().getElement().getStyle().setBottom(0, Unit.PX);
-		footerWidget.asWidget().getElement().getStyle().setLeft(0, Unit.PX);
-		footerWidget.asWidget().getElement().getStyle().setRight(0, Unit.PX);
-		footerWidget.asWidget().getElement().getStyle().setMarginBottom(0, Unit.PX);
+        footerWidget.asWidget().getElement().getStyle().setPosition(Position.ABSOLUTE);
+        footerWidget.asWidget().getElement().getStyle().setBottom(0, Unit.PX);
+        footerWidget.asWidget().getElement().getStyle().setLeft(0, Unit.PX);
+        footerWidget.asWidget().getElement().getStyle().setRight(0, Unit.PX);
+        footerWidget.asWidget().getElement().getStyle().setMarginBottom(0, Unit.PX);
 
-		popupWidget.add(footerWidget);
-	}
+        popupWidget.add(footerWidget);
+    }
 
 }
